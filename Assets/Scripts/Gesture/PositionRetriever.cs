@@ -16,13 +16,23 @@ public class FloatArrayListWrapper
 [System.Serializable]
 public class PositionRetriever
 {
-    public List<Vector3> RetrieveAverageGestures()
+    public Dictionary<SpellType, List<List<Vector3>>> LoadAllGestures()
     {
-        List<Vector3> cumulativeGestures = new List<Vector3>();
-        int gestureCount = 0;
+        Dictionary<SpellType, List<List<Vector3>>> allGestures = new Dictionary<SpellType, List<List<Vector3>>>();
 
-        // Charger spécifiquement le fichier "Water.json"
-        TextAsset jsonFile = Resources.Load<TextAsset>("Water");
+        foreach (SpellType spell in System.Enum.GetValues(typeof(SpellType)))
+        {
+            allGestures.Add(spell, RetrieveGestures(spell.ToString()));
+        }
+
+        return allGestures;
+    }
+
+    private List<List<Vector3>> RetrieveGestures(string spellName)
+    {
+        List<List<Vector3>> gesturesForSpell = new List<List<Vector3>>();
+
+        TextAsset jsonFile = Resources.Load<TextAsset>(spellName);
 
         if (jsonFile != null)
         {
@@ -35,19 +45,13 @@ public class PositionRetriever
                     if (wrapper.positions != null)
                     {
                         List<Vector3> gesture = ConvertToVector3List(wrapper.positions);
-                        AddGesture(cumulativeGestures, gesture);
-                        gestureCount++;
+                        gesturesForSpell.Add(gesture);
                     }
                 }
             }
         }
 
-        if (gestureCount > 0)
-        {
-            return CalculateAverageGesture(cumulativeGestures, gestureCount);
-        }
-
-        return new List<Vector3>(); // Retourne une liste vide si aucun geste n'est trouvé ou si une erreur se produit
+        return gesturesForSpell; // Retourne la liste de tous les gestes pour le sortilège
     }
 
     private List<Vector3> ConvertToVector3List(List<float> flatList)
@@ -58,30 +62,5 @@ public class PositionRetriever
             vectorList.Add(new Vector3(flatList[i], flatList[i + 1], flatList[i + 2]));
         }
         return vectorList;
-    }
-
-    private void AddGesture(List<Vector3> cumulativeGestures, List<Vector3> gesture)
-    {
-        for (int i = 0; i < gesture.Count; i++)
-        {
-            if (i < cumulativeGestures.Count)
-            {
-                cumulativeGestures[i] += gesture[i];
-            }
-            else
-            {
-                cumulativeGestures.Add(gesture[i]);
-            }
-        }
-    }
-
-    private List<Vector3> CalculateAverageGesture(List<Vector3> cumulativeGestures, int gestureCount)
-    {
-        List<Vector3> averageGestures = new List<Vector3>();
-        foreach (var pos in cumulativeGestures)
-        {
-            averageGestures.Add(pos / gestureCount);
-        }
-        return averageGestures;
     }
 }
