@@ -16,11 +16,11 @@ public class FloatArrayListWrapper
 [System.Serializable]
 public class PositionRetriever
 {
-    public Dictionary<SpellType, List<List<Vector3>>> LoadAllGestures()
+    public Dictionary<MagicElement.ElementEnum, List<List<Vector3>>> LoadAllGestures()
     {
-        Dictionary<SpellType, List<List<Vector3>>> allGestures = new Dictionary<SpellType, List<List<Vector3>>>();
+        Dictionary<MagicElement.ElementEnum, List<List<Vector3>>> allGestures = new Dictionary<MagicElement.ElementEnum, List<List<Vector3>>>();
 
-        foreach (SpellType spell in System.Enum.GetValues(typeof(SpellType)))
+        foreach (MagicElement.ElementEnum spell in System.Enum.GetValues(typeof(MagicElement.ElementEnum)))
         {
             allGestures.Add(spell, RetrieveGestures(spell.ToString()));
         }

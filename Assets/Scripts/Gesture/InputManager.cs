@@ -2,12 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.VFX;
 using UnityEngine.XR;
 
-public enum SpellType
+/*public enum MagicElement.ElementEnum
 {
     Fire, Water, Air, Electricity, Vitality, Earth
-}
+*/
 
 public class InputManager : MonoBehaviour
 {
@@ -37,12 +38,19 @@ public class InputManager : MonoBehaviour
     private bool isRecordingRight = false;
     private bool isRecordingLeft = false;
 
-    private SpellType? rightHandSpell = null;
-    private SpellType? leftHandSpell = null;
+    private MagicElement.ElementEnum? rightHandSpell = null;
+    private MagicElement.ElementEnum? leftHandSpell = null;
+
+    private SpellAbility currentSpellAbility;
+    private Coroutine currentSpellCoroutine;
+    [SerializeField] float castDelay;
+
+    [SerializeField] private GameObject rightHandObject;
+    [SerializeField] private GameObject leftHandObject;
 
     private PositionSaver positionSaver = new PositionSaver();
     private PositionRetriever positionRetriever = new PositionRetriever();
-    private Dictionary<SpellType, List<List<Vector3>>> spellGestures;
+    private Dictionary<MagicElement.ElementEnum, List<List<Vector3>>> spellGestures;
 
 
     void Start()
@@ -74,6 +82,9 @@ public class InputManager : MonoBehaviour
 
         a.performed += _ => AButton();
         a.Enable();
+
+        SetupHandVisual(leftHandObject);
+        SetupHandVisual(rightHandObject);
     }
 
     private void Update()
@@ -110,6 +121,7 @@ public class InputManager : MonoBehaviour
         if (rightHandPositions.Count > 0 && !rightHandSpell.HasValue)
         {
             rightHandSpell = DetectSpellType(rightHandPositions);
+            UpdateHandVisual(rightHandObject, (MagicElement.ElementEnum)rightHandSpell);
             CheckSpells();
         }
         rightHandPositions.Clear();
@@ -138,11 +150,24 @@ public class InputManager : MonoBehaviour
         if (leftHandPositions.Count > 0 && !leftHandSpell.HasValue)
         {
             leftHandSpell = DetectSpellType(leftHandPositions);
+            UpdateHandVisual(leftHandObject, (MagicElement.ElementEnum)leftHandSpell);
             CheckSpells();
         }
         leftHandPositions.Clear();
     }
 
+    void SetupHandVisual(GameObject hand)
+    {
+        hand.transform.GetChild(0).GetChild(0).GetComponent<MeshRenderer>().sharedMaterial = new Material(hand.transform.GetChild(0).GetChild(0).GetComponent<MeshRenderer>().sharedMaterial);
+        hand.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+    }
+
+    void UpdateHandVisual(GameObject hand, MagicElement.ElementEnum id)
+    {
+        hand.transform.GetChild(0).GetChild(0).GetComponent<MeshRenderer>().sharedMaterial.SetColor("_BaseColor", SpellManager.Instance.GetElement(id).PrimaryColor);
+        hand.transform.GetChild(0).GetChild(1).gameObject.SetActive(true);
+       hand.transform.GetChild(0).GetChild(1).GetComponent<VisualEffect>().SetVector4("Color", SpellManager.Instance.GetElement(id).PrimaryColor);
+    }
 
     void RightGrip()
     {
@@ -204,11 +229,11 @@ public class InputManager : MonoBehaviour
     }
 
 
-    private SpellType DetectSpellType(List<Vector3> recordedGesture)
+    private MagicElement.ElementEnum DetectSpellType(List<Vector3> recordedGesture)
     {
-        SpellType detectedSpell = SpellType.Fire;
+        MagicElement.ElementEnum detectedSpell = MagicElement.ElementEnum.Fire;
         float bestMatchPercentage = 0f;
-        Dictionary<SpellType, float> averageMatchPercentages = new Dictionary<SpellType, float>();
+        Dictionary<MagicElement.ElementEnum, float> averageMatchPercentages = new Dictionary<MagicElement.ElementEnum, float>();
 
         foreach (var spellGesture in spellGestures)
         {
@@ -235,7 +260,7 @@ public class InputManager : MonoBehaviour
         return detectedSpell;
     }
 
-    private void LogSpellMatches(Dictionary<SpellType, float> averageMatchPercentages)
+    private void LogSpellMatches(Dictionary<MagicElement.ElementEnum, float> averageMatchPercentages)
     {
         foreach (var spell in averageMatchPercentages)
         {
@@ -323,8 +348,18 @@ public class InputManager : MonoBehaviour
         if (rightHandSpell.HasValue && leftHandSpell.HasValue)
         {
             Debug.Log($"Right Hand Spell: {rightHandSpell}, Left Hand Spell: {leftHandSpell}");
+            
+            currentSpellAbility = SpellManager.Instance.CreateSpell((MagicElement.ElementEnum)rightHandSpell, (MagicElement.ElementEnum)leftHandSpell,rightHandObject.transform);
+            currentSpellCoroutine = StartCoroutine(CastCoroutine());
+
             UnlockHands();
         }
+    }
+
+    IEnumerator CastCoroutine()
+    {
+        yield return new WaitForSeconds(castDelay);
+        currentSpellAbility.Use();
     }
 
     private void UnlockHands()

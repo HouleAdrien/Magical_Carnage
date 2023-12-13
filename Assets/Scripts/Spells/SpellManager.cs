@@ -21,9 +21,11 @@ public class SpellManager : MonoBehaviour
     public SpellEffect GetSpellEffect(MagicElement.ElementEnum e) { return spellEffects[(int)e]; }
 
 
-    public SpellAbility CreateSpell(MagicElement.ElementEnum baseElement, MagicElement.ElementEnum effectElement)
+    public SpellAbility CreateSpell(MagicElement.ElementEnum baseElement, MagicElement.ElementEnum effectElement,Transform caster)
     {
-        SpellAbility sa = Instantiate(spellAbilityPrefab);
+        SpellAbility sa = Instantiate(spellAbilityPrefab, caster);
+        sa.transform.localPosition = Vector3.zero;
+        sa.transform.localRotation = Quaternion.identity;
         sa.Build(baseElement, effectElement);
         return sa;
     }
