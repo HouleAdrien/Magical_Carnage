@@ -25,8 +25,8 @@ public class SpellAbility : MonoBehaviour
         Destroy(sbase.gameObject);
     }
 
-    public void Use()
+    public void Use(Transform caster)
     {
-        sbase.Use();
+        sbase.Use(caster,seffect);
     }
 }

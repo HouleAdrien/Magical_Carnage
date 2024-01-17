@@ -14,7 +14,7 @@ public class SpellBase : SpellElement
         linkedAbility = sa;
     }
 
-    public virtual void Use()
+    public virtual void Use(Transform caster, SpellEffect effect)
     {
         foreach(GameObject vfx in useVfxs)
         {

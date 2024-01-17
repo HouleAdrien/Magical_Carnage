@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.VFX;
@@ -27,6 +28,8 @@ public class InputManager : MonoBehaviour
     [SerializeField] private InputAction a;
     #endregion
 
+    [SerializeField] Transform playerTransform;
+
     private XRNode rightHandNode = XRNode.RightHand;
     private XRNode leftHandNode = XRNode.LeftHand;
 
@@ -51,6 +54,9 @@ public class InputManager : MonoBehaviour
     private PositionSaver positionSaver = new PositionSaver();
     private PositionRetriever positionRetriever = new PositionRetriever();
     private Dictionary<MagicElement.ElementEnum, List<List<Vector3>>> spellGestures;
+
+    float chrono = 0.0f;
+    bool isChronoRuning = false;
 
 
     void Start()
@@ -89,6 +95,7 @@ public class InputManager : MonoBehaviour
 
     private void Update()
     {
+      
         if (isRecordingRight)
         {
             rightHandPositions.Add(InputTracking.GetLocalPosition(rightHandNode));
@@ -97,20 +104,41 @@ public class InputManager : MonoBehaviour
         {
             leftHandPositions.Add(InputTracking.GetLocalPosition(leftHandNode));
         }
+
+        if (isChronoRuning)
+        {
+            chrono += Time.deltaTime;
+            if (chrono > 5 )
+            {
+                isRecordingLeft = false;
+                isRecordingRight = false;
+                UnlockHands();
+              
+            }
+        }
+        
     }
 
     void StartRecordingRight()
     {
-        if (!rightHandSpell.HasValue)
+        rightHandSpell = null;
+        rightHandObject.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+
+        rightHandObject.transform.GetChild(1).gameObject.SetActive(true);
+
+        //  if (!rightHandSpell.HasValue)
         {
             isRecordingRight = true;
             rightHandPositions.Clear();
         }
+        chrono = 0;
+        isChronoRuning = true;
     }
 
     void StopRecordingRight()
     {
         isRecordingRight = false;
+        rightHandObject.transform.GetChild(1).gameObject.SetActive(false);
 
         if (saveMode)
         {
@@ -129,16 +157,24 @@ public class InputManager : MonoBehaviour
 
     void StartRecordingLeft()
     {
-        if (!leftHandSpell.HasValue)
+        leftHandSpell = null;
+        leftHandObject.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+        leftHandObject.transform.GetChild(1).gameObject.SetActive(true);
+
+
+        // if (!leftHandSpell.HasValue)
         {
             isRecordingLeft = true;
             leftHandPositions.Clear();
         }
+        chrono = 0;
+        isChronoRuning = true;
     }
 
     void StopRecordingLeft()
     {
         isRecordingLeft = false;
+        leftHandObject.transform.GetChild(1).gameObject.SetActive(false);
 
         if (saveMode)
         {
@@ -166,7 +202,7 @@ public class InputManager : MonoBehaviour
     {
         hand.transform.GetChild(0).GetChild(0).GetComponent<MeshRenderer>().sharedMaterial.SetColor("_BaseColor", SpellManager.Instance.GetElement(id).PrimaryColor);
         hand.transform.GetChild(0).GetChild(1).gameObject.SetActive(true);
-       hand.transform.GetChild(0).GetChild(1).GetComponent<VisualEffect>().SetVector4("Color", SpellManager.Instance.GetElement(id).PrimaryColor);
+        hand.transform.GetChild(0).GetChild(1).GetComponent<VisualEffect>().SetVector4("Color", SpellManager.Instance.GetElement(id).PrimaryColor);
     }
 
     void RightGrip()
@@ -348,24 +384,36 @@ public class InputManager : MonoBehaviour
         if (rightHandSpell.HasValue && leftHandSpell.HasValue)
         {
             Debug.Log($"Right Hand Spell: {rightHandSpell}, Left Hand Spell: {leftHandSpell}");
-            
+
             currentSpellAbility = SpellManager.Instance.CreateSpell((MagicElement.ElementEnum)rightHandSpell, (MagicElement.ElementEnum)leftHandSpell,rightHandObject.transform);
-            currentSpellCoroutine = StartCoroutine(CastCoroutine());
+            currentSpellCoroutine = StartCoroutine(CastCoroutine((MagicElement.ElementEnum)leftHandSpell));
 
             UnlockHands();
         }
+
     }
 
-    IEnumerator CastCoroutine()
+    IEnumerator CastCoroutine(MagicElement.ElementEnum lh)
     {
-        yield return new WaitForSeconds(castDelay);
-        currentSpellAbility.Use();
+        yield return new WaitForSeconds(SpellManager.Instance.GetElement(lh).CastDelay);//castDelay);
+        currentSpellAbility.Use(playerTransform);
+    }
+
+    IEnumerator DisableHandEffects()
+    {
+        yield return new WaitForSeconds(0.8f);
+        rightHandObject.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+        leftHandObject.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
     }
 
     private void UnlockHands()
     {
         rightHandSpell = null;
         leftHandSpell = null;
+
+        StartCoroutine(DisableHandEffects());
+
+        isChronoRuning = false;
     }
 
 }

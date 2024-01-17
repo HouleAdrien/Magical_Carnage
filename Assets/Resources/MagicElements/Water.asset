@@ -17,3 +17,5 @@ MonoBehaviour:
   colors:
   - {r: 0, g: 0.59697556, b: 1, a: 1}
   - {r: 0, g: 0.0018956661, b: 1, a: 0.98039216}
+  castDelay: 1
+  damage: 25
