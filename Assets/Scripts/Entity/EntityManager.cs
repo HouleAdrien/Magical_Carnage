@@ -30,6 +30,7 @@ public class EntityManager
     public void RemoveEntity(Entity entity)
     {
         entities.Remove(entity);
+        player.GetComponent<Player>().AddKill();
     }
 
     public List<Entity> GetEntities()

@@ -145,6 +145,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   deathVisuals: {fileID: 266586033512799711}
+  sizes: {x: 0.5, y: 1.75}
   attackDistance: 7
   attackRate: 1
   bullet: {fileID: 7418870992437716428, guid: 73bed4b289e65c54eabe25dc40e6fb78, type: 3}

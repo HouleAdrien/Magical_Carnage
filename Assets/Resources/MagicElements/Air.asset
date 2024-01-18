@@ -17,4 +17,7 @@ MonoBehaviour:
   colors:
   - {r: 1, g: 1, b: 1, a: 1}
   - {r: 0.6792453, g: 0.6792453, b: 0.6792453, a: 1}
+  castDelay: 0
   damage: 20
+  weakness: 4
+  resistance: 5

@@ -56,7 +56,7 @@ MonoBehaviour:
   - {fileID: 1613974736071366465}
   - {fileID: 8110082701871520782}
   explosionRadius: 3
-  damages: 100
+  damages: 75
 --- !u!54 &2978352329820488593
 Rigidbody:
   m_ObjectHideFlags: 0

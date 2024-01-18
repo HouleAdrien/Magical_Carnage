@@ -100,7 +100,7 @@ public class LightningObject : MonoBehaviour
     {
         if (other.TryGetComponent(out Entity e))
         {
-            e.ReceiveDamage(Mathf.CeilToInt(damage * Time.fixedDeltaTime * effect.ElementData.Damage));
+            e.ReceiveDamage(Mathf.CeilToInt(damage * Time.fixedDeltaTime * effect.ElementData.Damage), effect.Element);
         }
     }
 }

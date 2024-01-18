@@ -52,7 +52,7 @@ public class Projectile : MonoBehaviour
         {
             if(c.TryGetComponent(out Entity e))
             {
-                e.ReceiveDamage(damages * effect.ElementData.Damage);
+                e.ReceiveDamage(damages * effect.ElementData.Damage, effect.Element);
             }
         }
 

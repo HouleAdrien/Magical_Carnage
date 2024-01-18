@@ -9,6 +9,7 @@ public class TornadoObject : MonoBehaviour
     [SerializeField] float speed;
     [SerializeField] float lifetime; float currentLifetime;
     [SerializeField] AnimationCurve speedOverTime;
+    [SerializeField] AnimationCurve randomnessCurve;
     [SerializeField] float randomness;
     [SerializeField] LayerMask layer;
     [SerializeField] int damage;
@@ -34,7 +35,7 @@ public class TornadoObject : MonoBehaviour
         currentLifetime += Time.fixedDeltaTime;
 
         Vector3 v = direction;
-        direction += transform.right * Random.Range(-1.0f, 1.0f) * randomness;
+        direction += transform.right * Random.Range(-1.0f, 1.0f) * randomness * randomnessCurve.Evaluate(currentLifetime / lifetime);
         direction.Normalize();
 
         transform.Translate(v * speed * speedOverTime.Evaluate(Mathf.Min(1, currentLifetime / lifetime)));
@@ -49,7 +50,7 @@ public class TornadoObject : MonoBehaviour
     {
         if(other.TryGetComponent(out Entity e))
         {
-            e.ReceiveDamage(Mathf.CeilToInt(damage * Time.fixedDeltaTime * effect.ElementData.Damage));
+            e.ReceiveDamage(Mathf.CeilToInt(damage * Time.fixedDeltaTime * effect.ElementData.Damage), effect.Element);
         }
     }
 }

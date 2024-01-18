@@ -48,7 +48,7 @@ public class RuneObject : MonoBehaviour
             {
                 if (c.TryGetComponent(out Entity ee))
                 {
-                    e.ReceiveDamage(damages * effect.ElementData.Damage);
+                    e.ReceiveDamage(damages * effect.ElementData.Damage, effect.Element);
                 }
             }
 

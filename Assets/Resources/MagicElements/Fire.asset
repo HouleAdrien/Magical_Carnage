@@ -19,3 +19,5 @@ MonoBehaviour:
   - {r: 1, g: 0, b: 0, a: 1}
   castDelay: 0.1
   damage: 50
+  weakness: 1
+  resistance: 4

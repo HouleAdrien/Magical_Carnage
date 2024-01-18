@@ -23,6 +23,7 @@ public class Entity : MonoBehaviour
     [SerializeField] AnimationCurve distanceSpeedCurve;
     [SerializeField] Transform deathVisuals;
 
+    [SerializeField] Vector2 sizes;
     [SerializeField] float attackDistance;
     [SerializeField] float attackRate; float d;
     [SerializeField] GameObject bullet;
@@ -34,7 +35,7 @@ public class Entity : MonoBehaviour
     MagicElement.ElementEnum type; public MagicElement.ElementEnum Type { get { return type; } }
 
     Transform Target { get { return EntityManager.Instance.Player.transform; } }
-
+    float size;
 
     public void Setup(Spawner s)
     {
@@ -43,13 +44,20 @@ public class Entity : MonoBehaviour
 
     protected virtual void Start()
     {
-        health = maxHealth; 
+        
         EntityManager.Instance.AddEntity(this);
 
-        meshRenderer.sharedMaterials[0] = new Material(meshRenderer.sharedMaterials[0]);
-        meshRenderer.sharedMaterials[1] = new Material(meshRenderer.sharedMaterials[1]);
+        type = (MagicElement.ElementEnum)Random.Range(0, 6);
+        size = Random.Range(sizes.x, sizes.y);
+        maxHealth = Mathf.CeilToInt(size * maxHealth) ;
+        health = maxHealth;
+
+        Material[] arr = meshRenderer.sharedMaterials;
+        arr[0] = new Material(meshRenderer.sharedMaterials[0]);
+        arr[1] = new Material(meshRenderer.sharedMaterials[1]);
         //meshRenderer.sharedMaterials[0].color = SpellManager.Instance.GetElement(type).PrimaryColor;
-        meshRenderer.sharedMaterials[1].color = SpellManager.Instance.GetElement(type).PrimaryColor;
+        arr[1].color = SpellManager.Instance.GetElement(type).PrimaryColor;
+        meshRenderer.sharedMaterials = arr;
     }
 
     private void OnDestroy()
@@ -60,7 +68,7 @@ public class Entity : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.localScale = Vector3.one * sizeCurve.Evaluate(health / (float)maxHealth);
+        transform.localScale = Vector3.one * size * sizeCurve.Evaluate(health / (float)maxHealth);
 
         Vector3 d = Target.position - transform.position;
         if (d.magnitude < attackDistance)
@@ -107,9 +115,23 @@ public class Entity : MonoBehaviour
         }
     }
 
-    public void ReceiveDamage(int d)
+    public void ReceiveDamage(int d,MagicElement.ElementEnum element)
     {
+        if(element == SpellManager.Instance.GetElement(type).Weakness)
+        {
+            d *= 2;
+        }
+        else if(element == SpellManager.Instance.GetElement(type).Resistance)
+        {
+            d /= 2;
+        }
+
         health -= d;
+
+        if (element == MagicElement.ElementEnum.Vitality)
+        {
+            EntityManager.Instance.Player.GetComponent<Player>().ReceiveDamages(Mathf.CeilToInt(-d * 0.1f));
+        }
     }
 
     private void OnTriggerStay(Collider other)

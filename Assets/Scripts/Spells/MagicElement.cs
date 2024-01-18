@@ -11,6 +11,10 @@ public class MagicElement : ScriptableObject
     [SerializeField] float castDelay; public float CastDelay { get { return castDelay; } }
 
     [SerializeField] int damage; public int Damage { get { return damage; } }
+
+    [SerializeField] ElementEnum weakness; public ElementEnum Weakness { get { return weakness; } }
+    [SerializeField] ElementEnum resistance; public ElementEnum Resistance { get { return resistance; } }
+
     public Color PrimaryColor { get { return Color(0); } }
     public Color SecondaryColor { get { return Color(1); } }
     public Color TertiaryColor { get { return Color(2); } }

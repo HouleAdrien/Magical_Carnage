@@ -45,7 +45,7 @@ public class WaterfallObject : MonoBehaviour
     {
         if (other.TryGetComponent(out Entity e))
         {
-            e.ReceiveDamage(Mathf.CeilToInt(damage * effect.ElementData.Damage));
+            e.ReceiveDamage(Mathf.CeilToInt(damage * effect.ElementData.Damage),effect.Element);
         }
     }
 }

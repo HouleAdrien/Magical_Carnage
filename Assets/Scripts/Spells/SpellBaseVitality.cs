@@ -22,9 +22,10 @@ public class SpellBaseVitality : SpellBase
         float d = 0;
         while (d < duration)
         {
+            Vector3 p = caster.position - Vector3.up * 0.5f;
             for (int i = 0; i < entities.Count; i++)
             {
-                Vector3 p = caster.position - Vector3.up * 0.5f;
+                if (entities[i] == null) { lineRenderersParent.GetChild(i).gameObject.SetActive(false); continue; }
                 Vector3 dd = entities[i].transform.position - p;
                 for (int j = 0; j < 100; j++)
                 {
@@ -36,7 +37,7 @@ public class SpellBaseVitality : SpellBase
                     }
                 }
 
-                entities[i].ReceiveDamage(Mathf.CeilToInt(damages * effect.ElementData.Damage * Time.deltaTime));
+                entities[i].ReceiveDamage(Mathf.CeilToInt(damages * effect.ElementData.Damage * Time.deltaTime), effect.Element);
             }
             yield return new WaitForEndOfFrame();
             d += Time.deltaTime;
